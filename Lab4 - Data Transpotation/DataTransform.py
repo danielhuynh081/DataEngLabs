@@ -13,9 +13,9 @@ print(f"Number of breadcrumbs in the dataset: {len(df)}")
 # Filtering
 
 # Remove the EVENT_NO_STOP , GPS_ATELLITES, GPS_HDOP column
-df = df.drop(columns=['EVENT_NO_STOP'])
+#df = df.drop(columns=['EVENT_NO_STOP'])
 
-df = df.drop(columns=['GPS_SATELLITES', 'GPS_HDOP'])
+#df = df.drop(columns=['GPS_SATELLITES', 'GPS_HDOP'])
 
 # Usecol to filter
 
@@ -35,22 +35,20 @@ df['TIMESTAMP'] = df.apply(timestampColumn, axis = 1)
 df = df.drop(columns=['OPD_DATE', 'ACT_TIME'])
 print(df.columns)
 
-# 1. Calculate difference in METERS
+# 1. Calculate differences
 df['dMETERS'] = df['METERS'].diff()
-
-# 2. Calculate difference in TIMESTAMP (seconds)
 df['dTIMESTAMP'] = df['TIMESTAMP'].diff().dt.total_seconds()
 
 # 3. Calculate SPEED (meters per second)
 df['SPEED'] = df.apply(lambda row: row['dMETERS'] / row['dTIMESTAMP'] if row['dTIMESTAMP'] != 0 else 0, axis=1)
 
-# 4. Drop temporary columns
+# 4. Remove the dMETERS and dTIMESTAMP columns
 df = df.drop(columns=['dMETERS', 'dTIMESTAMP'])
 
-# 5. Print stats
+
 print("Minimum speed:", df['SPEED'].min())
 print("Maximum speed:", df['SPEED'].max())
 print("Average speed:", df['SPEED'].mean())
 
-# Optional: See the first few speeds
-print(df[['TIMESTAMP', 'METERS', 'SPEED']].head(20))
+
+print(df.head(10))
