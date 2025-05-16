@@ -142,22 +142,39 @@ print("Cases DataFrame:\n", cases_df.head())
 ### Integration Challegenge 5
 
 # Rename Columns
-cases_df = cases_df.rename(columns={'2023-07-23': 'Final Cumulative Count'})
-deaths_df = deaths_df.rename(columns={'2023-07-23': 'Final Cumulative Count'})
+cases_df = cases_df.rename(columns={'2023-07-23': 'Cases'})
+deaths_df = deaths_df.rename(columns={'2023-07-23': 'Deaths'})
 
 # Print
 print("New Columns:\n",cases_df.columns.values.tolist())
 
 ### Do The Integration
 
-# Join DataFrames
-join1 = cases_df.join(deaths_df, lsuffix='_cases', rsuffix='_deaths')
-join_df = join1.join(census_df, lsuffix='_cases', rsuffix='_census')
+# Step 1: Rename the date column
+cases_df = cases_df.rename(columns={'2023-07-23': 'Cases'})
+deaths_df = deaths_df.rename(columns={'2023-07-23': 'Deaths'})
 
-# Add two new columns
-join_df['CasesPerCap'] = (join_df['Final Cumulative Count_cases'] + join_df['Final Cumulative Count_deaths'])/ join_df['TotalPop']
-print("Join DataFrame:\n", join_df.head())
+# Step 2: Set index to ["County Name, State"] for all
+cases_df.index = cases_df["County Name"] + ", " + cases_df["State"]
+deaths_df.index = deaths_df["County Name"] + ", " + deaths_df["State"]
+census_df.index = census_df["County"] + ", " + census_df["State"]
 
+# Step 3: Drop redundant columns to avoid column name conflicts
+cases_df = cases_df.drop(columns=["County Name", "State"])
+deaths_df = deaths_df.drop(columns=["County Name", "State"])
+census_df = census_df.drop(columns=["County", "State"])
+
+# Step 4: Join using .join() twice
+join1 = cases_df.join(deaths_df)
+join_df = join1.join(census_df)
+
+# Step 5: Add per capita columns
+join_df["CasesPerCap"] = join_df["Cases"] / join_df["TotalPop"]
+join_df["DeathsPerCap"] = join_df["Deaths"] / join_df["TotalPop"]
+
+# Step 6: Output
+print("join_df:\n", join_df.head())
+print("join_df row count:", join_df.shape[0])
 
 ###  Analyze
 
